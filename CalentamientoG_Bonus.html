@@ -1,0 +1,365 @@
+<html>
+<head>
+	<title> Calentamiento global - Bonus </title>
+	<meta charset="UTF-8">
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+</head>
+<body>
+	<center><h1 class="display-2">El Calentamiento global </h1><h2>es una realidad</h2>
+		<div class="card">
+    		<div class="card-body">
+      			<p class="card-text">El planeta se está calentando, el GISS Surface Temperature Analysis (GISTEMP) es un estimado del cambio de temperatura de la superficie de la tierra, estos datos contienen reportes mensuales de la temperatura de la tierra desde 1880 hasta 2017.<br/>
+Usted puede comprobar en esta gráfica cómo ha sido el comportamiento creciente de la temperatura en la tierra.
+</p>
+      			
+    		</div>
+  		</div>
+
+	
+	<div id="lineas">
+		<svg height=400 width=1060 id="viz2"></svg><br/>
+    <p class="card-text"><small class="text-muted">*Medida de incremento con respecto al año inicial del estudio (1880)</small></p>
+  </div>
+
+  
+	
+  <div class="card">
+    		<div class="card-body">
+      			<h5 class="card-title"><br/></h5>
+      			<p class="card-text">No todas las zonas del planeta tienen cambios de temperatura  constante, como puede ver la temperatura del hemisferio sur ha aumentado en proporciones menores en comparación con el hemisferio norte, posiblemente porque en este hemisferio hay una mayor extensión oceánica.
+</p>
+ 
+    		</div>
+  		</div>
+    <div id="zonas">
+    <table><tr><td>
+    <svg height=400 width=430 id="hem1"></svg></td> 
+    <td><svg height=400 width=430 id="hem2"></svg></td>
+    <td><svg height=400 width=430 id="hem3"></svg></td>
+    </tr>
+    <tr align="center">
+      <td><p class="card-text"><small class="text-muted">Zona norte: 90ºN - 24ºN</small></p></td>
+      <td><p class="card-text"><small class="text-muted">Zona Centro: 24ºN - 24ºS</small></p></td>
+      <td><p class="card-text"><small class="text-muted">Zona Sur: 24ºS - 90ºS</small></p></td>
+    </tr>
+  </table>
+
+  </div>
+
+  	<div class="card">
+    		<div class="card-body">
+      			
+      			<p class="card-text"><br/><br/>Se dice que, si la temperatura del planeta aumenta 2 grados más sería catastrófico, hagamos lo posible por reducir el llamado efecto invernadero, que es lo que finalmente calienta la tierra, aún es posible, sembremos, reduzcamos la producción de CO2, ahorremos energía.</p>
+            <h5 class="card-title">aún es posible</h5>
+ 
+    		</div>
+  		</div>
+	</center>
+</div>
+<br/><br/><br/>
+
+	<script src="https://d3js.org/d3.v5.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script>
+		/**************Trae los datos*****************/
+    var parseDate = d3.timeParse("%Y");
+
+		// d3.csv("https://raw.githubusercontent.com/yureimacv/VIZ_CalentamientoG/master/ZonAnn.csv")
+		// 			.then(function(data){
+		// 				dibuje_lineas(data, d3.select("#viz2"));
+		// 			});
+
+ d3.csv("https://raw.githubusercontent.com/yureimacv/VIZ_CalentamientoG/master/ZonAnn.csv", 
+  function ( d ) {
+  return {
+    'Year': parseDate(d[ 'Year' ]),
+    'Glob' : +d['Glob'],
+    'uno': +d['24N-90N'],
+    'dos': +d['24S-24N'],
+    'tre': +d['90S-24S']
+     };}).then(function(data){
+            dibuje_lineas(data, d3.select("#viz2"));
+          });
+		
+		function dibuje_lineas(consulta, svg){
+			//Consulta
+			
+			var consultaSort=consulta;
+	
+			//Variable
+			var margin = {top: 20, right: 40, bottom: 20, left: 40}, 
+  				height = +svg.attr("height") - margin.top - margin.bottom,
+  				width = +svg.attr("width") - margin.left - margin.right,
+  				g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+  					
+        //console.log(consultaSort.map(function(d) { return d.Year; }));
+		
+    	//Escalas
+          var x = d3.scaleTime()
+                    .domain(d3.extent(consultaSort, function(d) { return +d.Year; }))
+                    .range([0, width]);
+
+      		var y = d3.scaleLinear()
+      					.domain([d3.min(consultaSort, function(d) { return +d.Glob; }), d3.max(consultaSort, function(d) { return +d.Glob; })])
+      					.rangeRound ([height, 0]);
+
+      		var line = d3.line()
+                    .x(function(d) { return x(d.Year); })
+                    .y(function(d) { return y(d.Glob); });
+          
+       		//axis
+       		g.append("g")
+      				.attr("class", "axis axis--x")
+      				.attr("transform", "translate(0," + height + ")")
+      				.call(d3.axisBottom(x).scale(x));
+   				
+          g.append("g")
+      				.attr("class", "axis axis--y")
+      				.call(d3.axisLeft(y).ticks(null, "s"))
+              .append('text')
+                .attr("y", 15)
+                .attr("transform", "rotate(-90)")
+                .attr("fill", "#000")
+                .text("º Centigrados");
+            
+				
+				//grafica
+      
+
+
+var duration = 750;
+var circleRadiusHover = 8;
+var div = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+var formatTime = d3.timeFormat("%Y");
+var float = d3.format(".2f");
+
+
+
+				g.append("path")
+    				.datum(consultaSort)
+    				.attr("class", "line")
+    				.attr("d", line)
+    				.style("fill", "none")
+    				.style("stroke", "#E24E42")
+  					.style("stroke-width","3px");
+  		
+      		g.selectAll(".circle")
+    				.data(consultaSort)
+  					.enter().append("circle")
+    				.attr("class", "circle")
+            .style("fill", "none")
+    				.attr("cx", function(d) { return x(d.Year); })
+    				.attr("cy", function(d) { return y(d.Glob); })
+    				.attr("r", 3)
+            .style("fill", "#E24E42")
+            .on("mouseenter", function(d) {
+              d3.select(this)
+                div.transition()
+                  .duration(200)
+                  .style("opacity", .9);
+                div.html("<center>Incremento de <b>"+ float(d.Glob+0.4) + "ºC *</b><br> para el año <b>"+ formatTime(d.Year)+"</b></center>")//formatTime(d.date) + "YUUUUUU<br/>" + d.close)
+                  .style("left", (d3.event.pageX - 60) + "px")
+                  .style("top", (d3.event.pageY - 50) + "px");
+                 
+            })
+            .on("mouseover", function(d) {
+              d3.select(this)
+                .style("cursor", "pointer")
+                .style("fill", "none")
+                .style("stroke", "#000")
+                .attr('stroke-width',3)
+                .transition()
+                .duration(duration)
+                .attr("r", circleRadiusHover)})
+            .on("mouseout", function(d) {
+              d3.select(this) 
+              .style("fill", "#E24E42")
+              .style("stroke", "none")
+              .transition()
+              .duration(duration)
+              .attr("r", 3); });
+
+            // g.append("text")
+            //   .attr("dx", 12)
+            //   .attr("dy", ".35em")
+            //   .text("yu");//function (d) { return d.name });
+
+
+         
+
+
+
+
+       
+
+
+         var  height1 = +d3.select("#hem1").attr("height") - margin.top - margin.bottom,
+              width1 = +d3.select("#hem1").attr("width") - margin.left - margin.right,
+              hem1 = d3.select("#hem1").append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")"),
+              hem2 = d3.select("#hem2").append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")"),
+              hem3 = d3.select("#hem3").append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+              
+              console.log(hem1);
+      //Escalas
+          // var x = d3.scaleTime()
+          //           .domain(d3.extent(consultaSort, function(d) { return +d.Year; }))
+          //           .range([0, width]);
+
+          var x1 = d3.scaleTime()
+                    .domain(d3.extent(consultaSort, function(d) { return +d.Year; }))
+                    .range([0, width1]);
+
+          var y1 = d3.scaleLinear()
+                .domain([d3.min(consultaSort, function(d) { return +d.uno; }), d3.max(consultaSort, function(d) { return +d.uno; })])
+                .rangeRound ([height1, 0]);
+
+          var line1 = d3.line()
+                    .x(function(d) { return x1(d.Year); })
+                    .y(function(d) { return y1(d.uno); });
+          var line2 = d3.line()
+                    .x(function(d) { return x1(d.Year); })
+                    .y(function(d) { return y1(d.dos); });
+          var line3 = d3.line()
+                    .x(function(d) { return x1(d.Year); })
+                    .y(function(d) { return y1(d.tre); });
+          
+          //axis
+          hem1.append("g")
+              .attr("class", "axis axis--x")
+              .attr("transform", "translate(0," + height1 + ")")
+              .call(d3.axisBottom(x1).scale(x1))
+              .selectAll("text")
+                .attr("transform", "rotate(-80)")
+                .attr("text-anchor", "middle")
+                .attr("alignment-baseline", "central");
+          
+          hem1.append("g")
+              .attr("class", "axis axis--y")
+              .call(d3.axisLeft(y1).ticks(null, "s"))
+            .append("text")
+              .attr("y", y1(y1.ticks().pop()) + 0.5)
+                .attr("text-anchor", "end");
+        
+        //grafica
+        hem1.append("path")
+            .datum(consultaSort)
+            .attr("class", "line1")
+            .attr("d", line1)
+            .style("fill", "none")
+            .style("stroke", "#E86E80")
+            .style("stroke-width","3px")
+       //      .on('mouseenter', function (actual, i) {
+       //        d3.selectAll('.value')
+       //        .attr('opacity', 0);
+       //      const y = y1(actual.value)
+
+       //  line = hem1.append('line')
+       //    .attr('id', 'limit')
+       //    .attr('x1', 0)
+       //    .attr('y1', y)
+       //    .attr('x2', width)
+       //    .attr('y2', y)
+       // })
+       ;
+
+        hem2.append("g")
+              .attr("class", "axis axis--x")
+              .attr("transform", "translate(0," + height1 + ")")
+              .call(d3.axisBottom(x1).scale(x1))
+              .selectAll("text")
+                .attr("transform", "rotate(-80)")
+                .attr("text-anchor", "middle")
+                .attr("alignment-baseline", "central");
+          
+          hem2.append("g")
+              .attr("class", "axis axis--y")
+              .call(d3.axisLeft(y1).ticks(null, "s"))
+            .append("text")
+              .attr("y", y1(y1.ticks().pop()) + 0.5)
+                .attr("text-anchor", "end");
+        
+        //grafica
+        hem2.append("path")
+            .datum(consultaSort)
+            .attr("class", "line2")
+            .attr("d", line2)
+            .style("fill", "none")
+            .style("stroke", "#F7B733")
+            .style("stroke-width","3px");
+    
+       
+       hem3.append("g")
+              .attr("class", "axis axis--x")
+              .attr("transform", "translate(0," + height1 + ")")
+              .call(d3.axisBottom(x1).scale(x1))
+              .selectAll("text")
+                .attr("transform", "rotate(-80)")
+                .attr("text-anchor", "middle")
+                .attr("alignment-baseline", "central");
+          
+          hem3.append("g")
+              .attr("class", "axis axis--y")
+              .call(d3.axisLeft(y1).ticks(null, "s"))
+            .append("text")
+              .attr("y", y1(y1.ticks().pop()) + 0.5)
+                .attr("text-anchor", "end");
+        
+        //grafica
+        hem3.append("path")
+            .datum(consultaSort)
+            .attr("class", "line3")
+            .attr("d", line3)
+            .style("fill", "none")
+            .style("stroke", "#008F95")
+            .style("stroke-width","3px");
+      
+       }
+
+       
+
+
+         
+	</script>
+
+
+<div class="card">
+  <div class="card-header">
+    What - Why - How
+  </div>
+  <div class="card-body">
+    <h5 class="card-title">What</h5>
+    <p class="card-text">Tarea Principal(TP): <br/> Dataset Type: Table <br/> Year(Secuencial), Glob(Cuantitativo divergente) </p>
+    <p class="card-text">Tarea Uno(T1): <br/> Dataset Type: Table <br/> Year(Secuencial), 24N-90N, 24N-24S, 24S-90S (Cuantitativo divergente) </p>
+    
+  </div>
+  <div class="card-body">
+    <h5 class="card-title">Why</h5>
+    <p class="card-text">Tarea Principal(TP): <br/> <b>Actions</b> <br/> Present: Cómo la temperatura ha aumentado durante los años , con tendencia al crecimiento <br/> Lookup <br/> Identificar <br/> <b>Target</b> <br/>Trends, Distribution.</p>
+    <p class="card-text">Tarea Uno(T1): <br/> <b>Actions</b> <br/> Discover: Identificar el incremento de temperatura diferente en cada hemisferio <br/> compare <br/> <b>Target</b> <br/>Distribution.</p>
+    
+  </div>
+  <div class="card-body">
+    <h5 class="card-title">How</h5>
+    <p class="card-text">Encode - Arrange - Express: dot chart with connection marks (Show trends) </p>
+    
+  </div>
+</div>
+
+	<!-- Footer -->
+<footer class="page-footer font-small blue">
+
+  <div class="footer-copyright text-center py-3">© 2018 Creado por Maria Castro (Yureimacv):
+    <a href="https://tldrlegal.com/license/mit-license" target="_blank">  Under the MIT license </a>
+  </div>
+
+</footer>
+<!-- Footer -->
+
+</body>
+</html>
